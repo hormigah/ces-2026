@@ -1,9 +1,11 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import Content from "@/components/Content";
 import { getArticleBySlug } from "@/data/articles";
 import { formatDate } from "@/utils";
 import { articles } from "@/app/api/articles/route";
+import { DEFAULT_ARTICLE_IMAGE, SITE_LOGO_URL } from "@/config/constants";
 
 export interface ArticlePageProps {
   params: Promise<{
@@ -33,11 +35,18 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       publishedTime: article.publishedDate,
       authors: [article.author],
       tags: article.tags,
+      images: article.imageUrl ? [
+        {
+          url: article.imageUrl,
+          alt: article.imageAlt || article.title,
+        }
+      ] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title: article.title,
       description: article.description,
+      images: article.imageUrl ? [article.imageUrl] : undefined,
     },
     keywords: article.tags.join(", "),
   };
@@ -59,32 +68,46 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound();
   }
 
+  // Desestructuración del artículo
+  const {
+    title,
+    description,
+    content,
+    category,
+    author,
+    publishedDate,
+    imageUrl = DEFAULT_ARTICLE_IMAGE,
+    imageAlt,
+    tags,
+  } = article;
+
   // Datos estructurados JSON-LD para SEO
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": article.title,
-    "description": article.description,
+    "headline": title,
+    "description": description,
+    "image": imageUrl,
     "author": {
       "@type": "Person",
-      "name": article.author
+      "name": author
     },
-    "datePublished": article.publishedDate,
-    "dateModified": article.publishedDate,
+    "datePublished": publishedDate,
+    "dateModified": publishedDate,
     "publisher": {
       "@type": "Organization",
       "name": "CES 2026",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://ces2026.com/logo.png"
+        "url": SITE_LOGO_URL
       }
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://ces2026.com/${article.slug}`
+      "@id": `https://ces2026.com/${slug}`
     },
-    "articleSection": article.category,
-    "keywords": article.tags.join(", ")
+    "articleSection": category,
+    "keywords": tags.join(", ")
   };
 
   return (
@@ -109,7 +132,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </li>
                 <li aria-hidden="true">/</li>
                 <li className="text-gray-900" aria-current="page">
-                  {article.category}
+                  {category}
                 </li>
               </ol>
             </nav>
@@ -117,14 +140,26 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             {/* Categoría */}
             <div className="mb-4">
               <span className="inline-block px-3 py-1 text-sm font-semibold text-blue-800 bg-blue-50 rounded-full">
-                {article.category}
+                {category}
               </span>
             </div>
 
             {/* Título principal - h1 para SEO */}
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-              {article.title}
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              {title}
             </h1>
+
+            {/* Imagen del artículo */}
+            <div className="relative w-full aspect-video mb-6 rounded-lg overflow-hidden">
+              <Image
+                src={imageUrl}
+                alt={imageAlt || title}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1024px"
+                className="object-cover"
+                priority
+              />
+            </div>
 
             {/* Meta información del artículo */}
             <div className="flex flex-wrap items-center gap-4 text-gray-700 text-sm border-b border-gray-300 pb-6">
@@ -133,29 +168,29 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                 </svg>
                 <span>
-                  Por <strong className="text-gray-900">{article.author}</strong>
+                  Por <strong className="text-gray-900">{author}</strong>
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                   <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                 </svg>
-                <time dateTime={article.publishedDate}>
-                  {formatDate(article.publishedDate, 'long')}
+                <time dateTime={publishedDate}>
+                  {formatDate(publishedDate, 'long')}
                 </time>
               </div>
             </div>
 
             {/* Descripción/Sumario */}
             <p className="text-xl text-gray-800 mt-6 leading-relaxed">
-              {article.description}
+              {description}
             </p>
           </header>
 
           {/* Contenido del artículo */}
           <div
             className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-800 prose-a:text-blue-800 prose-a:hover:text-blue-900 prose-strong:text-gray-900 prose-ul:text-gray-800 prose-ol:text-gray-800"
-            dangerouslySetInnerHTML={{ __html: article.content }}
+            dangerouslySetInnerHTML={{ __html: content }}
           />
 
           {/* Tags/Etiquetas */}
@@ -163,7 +198,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <div className="mb-6">
               <h2 className="text-sm font-semibold text-gray-900 mb-3">Etiquetas:</h2>
               <div className="flex flex-wrap gap-2">
-                {article.tags.map((tag) => (
+                {tags.map((tag) => (
                   <span
                     key={tag}
                     className="inline-block px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition-colors"

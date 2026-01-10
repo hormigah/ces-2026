@@ -14,9 +14,9 @@ export default function Home() {
         {/* Encabezado de la página */}
         <header className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Artículos del CES 2026
+            Últimas novedades del CES 2026
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl">
+          <p className="text-xl text-gray-700 max-w-3xl">
             Cobertura completa de las innovaciones más impactantes del evento tecnológico
             más importante del año. Descubre las tendencias que definirán el futuro.
           </p>
@@ -39,24 +39,24 @@ export default function Home() {
         {/* Mensaje si no hay artículos */}
         {articles.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">
+            <p className="text-gray-700 text-lg">
               No hay artículos disponibles en este momento.
             </p>
           </div>
         )}
 
         {/* About CES Section */}
-        <section className="border-gray-200 pt-12">
+        <section className="border-gray-300 pt-12">
           <div className="max-w-3xl">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               Sobre el CES 2026
             </h2>
-            <p className="text-gray-600 leading-relaxed mb-4">
+            <p className="text-gray-700 leading-relaxed mb-4">
               El Consumer Electronics Show 2026 continúa siendo el evento tecnológico más importante
               del mundo, reuniendo a líderes de la industria, innovadores y visionarios para presentar
               las tecnologías que transformarán nuestras vidas.
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-700 leading-relaxed">
               Este año, el evento destaca especialmente los avances en inteligencia artificial,
               robótica doméstica, vehículos autónomos y nuevas formas de interacción digital que
               prometen revolucionar la forma en que trabajamos, nos comunicamos y vivimos.

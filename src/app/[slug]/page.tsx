@@ -1,10 +1,11 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Content from "@/components/Content";
-import { getArticleBySlug, getAllSlugs } from "@/data/articles";
-import { formatDate } from "@/lib/formatDate";
+import { getArticleBySlug } from "@/data/articles";
+import { formatDate } from "@/utils";
+import { articles } from "@/app/api/articles/route";
 
-interface ArticlePageProps {
+export interface ArticlePageProps {
   params: Promise<{
     slug: string;
   }>;
@@ -44,10 +45,8 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 
 // Generación estática de parámetros (SSG) - CLAVE para SEO
 export async function generateStaticParams() {
-  const slugs = getAllSlugs();
-
-  return slugs.map((slug) => ({
-    slug: slug,
+  return articles.map((article) => ({
+    slug: article.slug,
   }));
 }
 
@@ -97,14 +96,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       />
 
       <Content>
-        <article className="max-w-4xl mx-auto">
+        <article className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-8">
           {/* Encabezado del artículo */}
           <header className="mb-8">
             {/* Breadcrumb para navegación y SEO */}
             <nav aria-label="Breadcrumb" className="mb-4">
-              <ol className="flex items-center space-x-2 text-sm text-gray-600">
+              <ol className="flex items-center space-x-2 text-sm text-gray-700">
                 <li>
-                  <a href="/" className="hover:text-blue-600 transition-colors">
+                  <a href="/" className="hover:text-blue-800 transition-colors">
                     Inicio
                   </a>
                 </li>
@@ -117,7 +116,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
             {/* Categoría */}
             <div className="mb-4">
-              <span className="inline-block px-3 py-1 text-sm font-semibold text-blue-600 bg-blue-50 rounded-full">
+              <span className="inline-block px-3 py-1 text-sm font-semibold text-blue-800 bg-blue-50 rounded-full">
                 {article.category}
               </span>
             </div>
@@ -128,7 +127,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </h1>
 
             {/* Meta información del artículo */}
-            <div className="flex flex-wrap items-center gap-4 text-gray-600 text-sm border-b border-gray-200 pb-6">
+            <div className="flex flex-wrap items-center gap-4 text-gray-700 text-sm border-b border-gray-300 pb-6">
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
@@ -148,26 +147,26 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </div>
 
             {/* Descripción/Sumario */}
-            <p className="text-xl text-gray-700 mt-6 leading-relaxed">
+            <p className="text-xl text-gray-800 mt-6 leading-relaxed">
               {article.description}
             </p>
           </header>
 
           {/* Contenido del artículo */}
           <div
-            className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900 prose-ul:text-gray-700 prose-ol:text-gray-700"
+            className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-800 prose-a:text-blue-800 prose-a:hover:text-blue-900 prose-strong:text-gray-900 prose-ul:text-gray-800 prose-ol:text-gray-800"
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
 
           {/* Tags/Etiquetas */}
-          <footer className="mt-12 pt-8 border-t border-gray-200">
+          <footer className="mt-12 pt-8 border-t border-gray-300">
             <div className="mb-6">
               <h2 className="text-sm font-semibold text-gray-900 mb-3">Etiquetas:</h2>
               <div className="flex flex-wrap gap-2">
                 {article.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-block px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
+                    className="inline-block px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition-colors"
                   >
                     {tag}
                   </span>
@@ -179,7 +178,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <div className="mt-8">
               <a
                 href="/"
-                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                className="inline-flex items-center gap-2 text-blue-800 hover:text-blue-900 font-medium transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

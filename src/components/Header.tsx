@@ -2,12 +2,12 @@ import Link from "next/link";
 
 export default function Header() {
   return (
-    <header className="border-b border-gray-200 bg-white">
+    <header className="border-b border-gray-300 bg-white shadow-sm">
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="text-3xl font-bold text-gray-900">
-              CES <span className="text-blue-600">2026</span>
+              CES <span className="text-blue-800">2026</span>
             </div>
           </Link>
 
@@ -16,7 +16,7 @@ export default function Header() {
               <li>
                 <Link
                   href="/"
-                  className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+                  className="text-gray-800 hover:text-blue-800 transition-colors font-medium"
                 >
                   Inicio
                 </Link>
@@ -26,7 +26,7 @@ export default function Header() {
         </div>
 
         <div className="mt-4">
-          <p className="text-sm text-gray-600 max-w-2xl">
+          <p className="text-sm text-gray-700 max-w-2xl">
             Descubre las últimas innovaciones en tecnología, IA, robótica y gadgets del evento tecnológico más importante del año
           </p>
         </div>

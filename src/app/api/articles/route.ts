@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server';
 import type { Article } from "@/types";
 
 export const articles: Article[] = [
@@ -242,14 +243,6 @@ export const articles: Article[] = [
   }
 ];
 
-export function getArticleBySlug(slug: string): Article | undefined {
-  return articles.find(article => article.slug === slug);
-}
-
-export function getAllArticles(): Article[] {
-  return articles;
-}
-
-export function getAllSlugs(): string[] {
-  return articles.map(article => article.slug);
+export async function GET() {
+  return NextResponse.json(articles);
 }

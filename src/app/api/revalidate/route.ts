@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     revalidatePath(path || '/');
 
     return NextResponse.json({ revalidated: true, now: Date.now() });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ message: 'Error revalidando' }, { status: 500 });
   }
 }

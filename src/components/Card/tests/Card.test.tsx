@@ -6,7 +6,7 @@ import { DEFAULT_ARTICLE_IMAGE } from '@/config/constants';
 describe('Card Component', () => {
   const mockArticle: Article = {
     id: '1',
-    slug: 'test-article',
+    slug: '/test-article',
     title: 'Test Article Title',
     description: 'This is a test article description',
     category: 'Technology',
@@ -53,7 +53,7 @@ describe('Card Component', () => {
 
     // Both the image link and title link should point to the article slug
     links.forEach((link) => {
-      expect(link).toHaveAttribute('href', `/${mockArticle.slug}`);
+      expect(link).toHaveAttribute('href', mockArticle.slug);
     });
   });
 

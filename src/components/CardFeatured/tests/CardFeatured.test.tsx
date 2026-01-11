@@ -6,7 +6,7 @@ import { DEFAULT_ARTICLE_IMAGE } from '@/config/constants';
 describe('CardFeatured Component', () => {
   const mockArticle: Article = {
     id: '1',
-    slug: 'featured-test-article',
+    slug: '/featured-test-article',
     title: 'Featured Test Article Title',
     description: 'This is a featured test article description with more detailed content',
     category: 'Technology',
@@ -53,7 +53,7 @@ describe('CardFeatured Component', () => {
 
     // All links should point to the article slug
     links.forEach((link) => {
-      expect(link).toHaveAttribute('href', `/${mockArticle.slug}`);
+      expect(link).toHaveAttribute('href', mockArticle.slug);
     });
   });
 
@@ -64,7 +64,7 @@ describe('CardFeatured Component', () => {
     const imageLink = container.querySelector('a[href*="featured-test-article"]');
 
     expect(imageLink).toBeInTheDocument();
-    expect(imageLink).toHaveAttribute('href', `/${mockArticle.slug}`);
+    expect(imageLink).toHaveAttribute('href', mockArticle.slug);
   });
 
   it('should render the image with correct src and alt', () => {

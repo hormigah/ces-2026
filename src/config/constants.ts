@@ -2,7 +2,11 @@
  * Configuración global de constantes de la aplicación
  */
 
-// Imágenes
+// API
+export const API_BASE_URL =
+  process.env.API_BASE_URL || 'https://dev-ces-2026-backend.pantheonsite.io';
+
+// Images
 export const DEFAULT_ARTICLE_IMAGE = '/images/ces2026.jpg';
 export const DEFAULT_ARTICLE_IMAGE_ALT = 'CES 2026 - Consumer Electronics Show';
 

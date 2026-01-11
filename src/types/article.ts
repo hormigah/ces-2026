@@ -1,5 +1,5 @@
 export interface Article {
-  id: number;
+  id: string;
   title: string;
   slug: string;
   description: string;
@@ -10,4 +10,18 @@ export interface Article {
   imageUrl?: string;
   imageAlt?: string;
   tags: string[];
+}
+
+export interface APIArticle {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  content: string;
+  category: string;
+  author: string;
+  publishedDate: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  tags: string;
 }

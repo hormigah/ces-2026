@@ -5,7 +5,7 @@ import { DEFAULT_ARTICLE_IMAGE } from '@/config/constants';
 
 describe('CardFeatured Component', () => {
   const mockArticle: Article = {
-    id: 1,
+    id: '1',
     slug: 'featured-test-article',
     title: 'Featured Test Article Title',
     description: 'This is a featured test article description with more detailed content',

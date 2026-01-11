@@ -4,7 +4,7 @@
 
 // API
 export const API_BASE_URL =
-  process.env.API_BASE_URL || 'https://dev-ces-2026-backend.pantheonsite.io';
+  process.env.NEXT_PUBLIC_API_URL || 'https://dev-ces-2026-backend.pantheonsite.io';
 
 // Images
 export const DEFAULT_ARTICLE_IMAGE = '/images/ces2026.jpg';

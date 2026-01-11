@@ -40,7 +40,7 @@ cp .env.example .env.local
 
 Editar `.env.local` con la URL del backend:
 ```env
-API_BASE_URL=https://dev-ces-2026-backend.pantheonsite.io
+NEXT_PUBLIC_API_URL=https://dev-ces-2026-backend.pantheonsite.io
 ```
 
 4. Ejecutar el servidor de desarrollo:
@@ -93,7 +93,7 @@ Se eligió **App Router** por las siguientes razones:
 El proyecto consume datos de una API REST:
 
 - **Endpoint**: `https://dev-ces-2026-backend.pantheonsite.io/api/articles`
-- **Configuración**: Variable de entorno `API_BASE_URL`
+- **Configuración**: Variable de entorno `NEXT_PUBLIC_API_URL`
 - **Estrategia**: ISR para balance entre performance y frescura de datos
 
 **Transformación de Datos:**
@@ -157,7 +157,7 @@ src/
 export const revalidate = 60;
 
 async function getArticles(): Promise<Article[]> {
-  const response = await fetch(`${API_BASE_URL}/api/articles`, {
+  const response = await fetch(`${NEXT_PUBLIC_API_URL}/api/articles`, {
     next: { revalidate: 60 },
   });
   // ...
@@ -648,7 +648,7 @@ ces2026/
 
 ```env
 # API Configuration
-API_BASE_URL=https://dev-ces-2026-backend.pantheonsite.io
+NEXT_PUBLIC_API_URL=https://dev-ces-2026-backend.pantheonsite.io
 ```
 
 Copiar `.env.example` a `.env.local` y configurar según el entorno.
@@ -669,7 +669,7 @@ git push origin main
 - Output Directory: `.next`
 - Install Command: `npm install`
 - Node Version: 20.x
-- Environment Variables: Configurar `API_BASE_URL`
+- Environment Variables: Configurar `NEXT_PUBLIC_API_URL`
 
 ## Cumplimiento de Prueba Técnica
 

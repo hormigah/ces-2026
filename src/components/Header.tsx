@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from 'next/link';
 
 export default function Header() {
   return (
@@ -27,7 +27,8 @@ export default function Header() {
 
         <div className="mt-4">
           <p className="text-sm text-gray-700 max-w-2xl">
-            Descubre las últimas innovaciones en tecnología, IA, robótica y gadgets del evento tecnológico más importante del año
+            Descubre las últimas innovaciones en tecnología, IA, robótica y gadgets del evento
+            tecnológico más importante del año
           </p>
         </div>
       </div>

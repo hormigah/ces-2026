@@ -1,0 +1,35 @@
+# Dependencies
+node_modules
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+.next
+out
+build
+dist
+
+# Cache
+.cache
+.vercel
+.turbo
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Misc
+.DS_Store
+*.pem
+coverage
+
+# Next.js
+next-env.d.ts
+
+# Documentation
+docs/Prueba\ Técnica_RQ_React.pdf

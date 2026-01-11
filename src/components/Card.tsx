@@ -1,8 +1,8 @@
-import Link from "next/link";
-import Image from "next/image";
-import type { Article } from "@/types";
-import { formatDate } from "@/utils";
-import { DEFAULT_ARTICLE_IMAGE } from "@/config/constants";
+import Link from 'next/link';
+import Image from 'next/image';
+import type { Article } from '@/types';
+import { formatDate } from '@/utils';
+import { DEFAULT_ARTICLE_IMAGE } from '@/config/constants';
 
 interface CardProps {
   article: Article;
@@ -49,18 +49,13 @@ export default function Card({ article }: Readonly<CardProps>) {
 
             {/* Título */}
             <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight">
-              <Link
-                href={`/${slug}`}
-                className="hover:text-blue-800 transition-colors"
-              >
+              <Link href={`/${slug}`} className="hover:text-blue-800 transition-colors">
                 {title}
               </Link>
             </h3>
 
             {/* Descripción */}
-            <p className="text-sm text-gray-700 mb-3 line-clamp-2 leading-relaxed">
-              {description}
-            </p>
+            <p className="text-sm text-gray-700 mb-3 line-clamp-2 leading-relaxed">{description}</p>
           </div>
 
           {/* Footer con meta información */}
@@ -69,13 +64,15 @@ export default function Card({ article }: Readonly<CardProps>) {
             <div className="flex items-center gap-3 text-xs text-gray-600">
               <span className="flex items-center gap-1">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 {author}
               </span>
-              <time dateTime={publishedDate}>
-                {formatDate(publishedDate, 'long')}
-              </time>
+              <time dateTime={publishedDate}>{formatDate(publishedDate, 'long')}</time>
             </div>
           </div>
         </div>

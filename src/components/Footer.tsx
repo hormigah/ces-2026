@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from 'next/link';
 
 export default function Footer() {
   return (
@@ -8,8 +8,8 @@ export default function Footer() {
           <div>
             <h2 className="text-lg font-bold text-gray-900 mb-3">CES 2026</h2>
             <p className="text-sm text-gray-700">
-              Cobertura completa del Consumer Electronics Show 2026.
-              Las últimas tendencias en tecnología, innovación y futuro digital.
+              Cobertura completa del Consumer Electronics Show 2026. Las últimas tendencias en
+              tecnología, innovación y futuro digital.
             </p>
           </div>
 
@@ -38,8 +38,7 @@ export default function Footer() {
 
         <div className="mt-8 pt-6 border-t border-gray-300">
           <p className="text-sm text-gray-600 text-center">
-            &copy; 2026 CES 2026 - Cobertura informativa.
-            Todos los derechos reservados.
+            &copy; 2026 CES 2026 - Cobertura informativa. Todos los derechos reservados.
           </p>
         </div>
       </div>

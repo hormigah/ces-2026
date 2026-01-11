@@ -1,7 +1,7 @@
-import Content from "@/components/Content";
-import CardFeatured from "@/components/CardFeatured";
-import Card from "@/components/Card";
-import { getAllArticles } from "@/data/articles";
+import Content from '@/components/Content';
+import CardFeatured from '@/components/CardFeatured';
+import Card from '@/components/Card';
+import { getAllArticles } from '@/utils';
 
 export default function Home() {
   const articles = getAllArticles();
@@ -17,8 +17,8 @@ export default function Home() {
             Últimas novedades del CES 2026
           </h1>
           <p className="text-xl text-gray-700 max-w-3xl">
-            Cobertura completa de las innovaciones más impactantes del evento tecnológico
-            más importante del año. Descubre las tendencias que definirán el futuro.
+            Cobertura completa de las innovaciones más impactantes del evento tecnológico más
+            importante del año. Descubre las tendencias que definirán el futuro.
           </p>
         </header>
 
@@ -39,22 +39,18 @@ export default function Home() {
         {/* Mensaje si no hay artículos */}
         {articles.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-700 text-lg">
-              No hay artículos disponibles en este momento.
-            </p>
+            <p className="text-gray-700 text-lg">No hay artículos disponibles en este momento.</p>
           </div>
         )}
 
         {/* About CES Section */}
         <section className="border-gray-300 pt-12">
           <div className="max-w-3xl">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Sobre el CES 2026
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Sobre el CES 2026</h2>
             <p className="text-gray-700 leading-relaxed mb-4">
               El Consumer Electronics Show 2026 continúa siendo el evento tecnológico más importante
-              del mundo, reuniendo a líderes de la industria, innovadores y visionarios para presentar
-              las tecnologías que transformarán nuestras vidas.
+              del mundo, reuniendo a líderes de la industria, innovadores y visionarios para
+              presentar las tecnologías que transformarán nuestras vidas.
             </p>
             <p className="text-gray-700 leading-relaxed">
               Este año, el evento destaca especialmente los avances en inteligencia artificial,

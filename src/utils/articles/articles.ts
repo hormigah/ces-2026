@@ -51,7 +51,6 @@ export async function getArticleFromAPI(slug: string): Promise<Article[]> {
 
     const data: APIArticle[] = await response.json();
     return adaptArticles(data);
-    
   } catch (error) {
     console.error('Error fetching articles:', error);
     return [];

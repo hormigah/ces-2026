@@ -147,7 +147,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </li>
                 <li aria-hidden="true">/</li>
                 <li className="text-gray-900" aria-current="page">
-                  {category}
+                  {title}
                 </li>
               </ol>
             </nav>

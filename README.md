@@ -90,24 +90,16 @@ Se eligió **App Router** por las siguientes razones:
 
 ### Integración con Backend API
 
-El proyecto consume datos de una API REST:
+El proyecto consume datos de una API REST con funciones centralizadas:
 
-- **Endpoint**: `https://dev-ces-2026-backend.pantheonsite.io/api/articles`
+- **API Base**: `https://dev-ces-2026-backend.pantheonsite.io`
+- **Endpoints**:
+  - `/api/articles` - Listado completo de artículos
+  - `/api/article-by-slug/?slug=/[slug]` - Artículo individual por slug
 - **Configuración**: Variable de entorno `NEXT_PUBLIC_API_URL`
-- **Estrategia**: ISR para balance entre performance y frescura de datos
+- **Estrategia**: ISR para balance entre performance y actualización de la información
+- **Ubicación**: Utilidades centralizadas en `src/utils/articles/articles.ts`
 
-**Transformación de Datos:**
-La API devuelve un formato ligeramente diferente al tipo local:
-- `id`: string (API) → mantiene como string
-- `tags`: string separado por comas (API) → array de strings (app)
-
-```typescript
-// Transformación en getArticles()
-return data.map((article) => ({
-  ...article,
-  tags: article.tags.split(',').map((tag) => tag.trim()),
-}));
-```
 
 ### Arquitectura de Componentes
 
@@ -129,7 +121,6 @@ src/
 ├── config/                   # Configuración centralizada
 │   ├── constants.ts
 │   └── index.ts
-├── data/                     # Datos locales (fallback)
 ├── types/                    # Definiciones TypeScript
 ├── utils/                    # Utilidades compartidas
 └── tests/                    # Testing utilities
@@ -140,7 +131,7 @@ src/
 **Características:**
 - Cada componente en su propio directorio
 - Barrel exports (`index.ts`) para imports limpios
-- Tests co-ubicados con componentes
+- Tests ubicados con su propio componente
 - Configuración centralizada
 
 ## Estrategia de Rendering
@@ -153,17 +144,6 @@ src/
 - Balance entre performance (static) y frescura de datos (revalidación)
 - HTML estático actualizado automáticamente cada 60s
 
-```typescript
-export const revalidate = 60;
-
-async function getArticles(): Promise<Article[]> {
-  const response = await fetch(`${NEXT_PUBLIC_API_URL}/api/articles`, {
-    next: { revalidate: 60 },
-  });
-  // ...
-}
-```
-
 **Justificación de ISR:**
 - Contenido se actualiza periódicamente desde el backend
 - Los bots ven HTML estático completo (excelente SEO)
@@ -171,25 +151,37 @@ async function getArticles(): Promise<Article[]> {
 - Reducción de carga en el servidor API
 
 **Página de Detalle (`/[slug]`):**
-- **SSG con `generateStaticParams`**
+- **ISR con `generateStaticParams` + revalidate: 60 segundos**
 - Pre-genera todas las rutas en build time
+- Se actualiza automáticamente cada 60 segundos
 - Metadata dinámica con `generateMetadata`
 - Fallback a 404 si el slug no existe
+
+**Sitemap Dinámico (`/sitemap.xml`):**
+- **ISR con revalidate: 60 segundos**
+- Genera automáticamente URLs de todos los artículos
+- Incluye prioridades y frecuencias de cambio
+- Fechas de última modificación basadas en publishedDate
+- Se actualiza automáticamente cuando hay nuevos artículos
 
 ### Proceso de Build
 
 ```bash
-Route (app)                              Revalidate  Expire
-┌ ○ /                                          1m      1y
+Route (app)                                                                      Revalidate  Expire
+┌ ○ /                                                                                    1m      1y
 ├ ○ /_not-found
-├ ● /[slug]
-│ ├ /ia-generativa-revoluciona-entretenimiento-ces-2026
-│ ├ /robotica-domestica-asistentes-hogar-ces-2026
-│ └ /vehiculos-autonomos-nivel-5-conduccion-autonoma-ces-2026
-└ ○ /robots.txt
+├ ● /[slug]                                                                              1m      1y
+│ ├ /ia-generativa-revoluciona-la-industria-del-entretenimiento-en-ces-2026              1m      1y
+│ ├ /robotica-domestica-los-nuevos-asistentes-del-hogar-presentados-en-ces-2026          1m      1y
+│ ├ /vehiculos-autonomos-nivel-5-la-conduccion-totalmente-autonoma-es-realidad           1m      1y
+│ └ [+2 more paths]
+├ ƒ /api/revalidate
+├ ○ /robots.txt
+└ ○ /sitemap.xml                                                                         1m      1y
 
-○  (Static)  prerendered as static content
-●  (SSG)     prerendered as static HTML
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
 ```
 
 ## Consideraciones SEO
@@ -343,12 +335,55 @@ Mejoras de accesibilidad que también benefician al SEO:
 
 Implementado en `app/robots.ts`:
 ```typescript
-export default function robots() {
+export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: '*', allow: '/' },
+    rules: {
+      userAgent: '*',
+      allow: '/',
+      disallow: '/private/',
+    },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }
+```
+
+**Características:**
+- Permite el rastreo completo del sitio
+- Bloquea rutas privadas (si existieran)
+- Referencia al sitemap dinámico
+- Usa variable de entorno para el dominio
+
+### Sitemap Dinámico (sitemap.xml)
+
+Implementado en `app/sitemap.ts` con generación dinámica desde la API:
+
+
+**Beneficios para SEO:**
+- **Descubrimiento automático**: Los motores de búsqueda encuentran todas las páginas
+- **Actualización dinámica**: Se regenera cada 60s con ISR, incluyendo nuevos artículos
+- **Prioridades correctas**: Homepage = 1.0, artículos = 0.8
+- **Fechas precisas**: `lastModified` basado en fecha de publicación real
+- **Frecuencia de cambio**: Indica a buscadores cuándo revisar (`daily` vs `weekly`)
+- **URLs normalizadas**: Formato consistente sin duplicados
+
+**Ejemplo de salida:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://ces-2026-seven.vercel.app</loc>
+    <lastmod>2026-01-11T21:57:34.665Z</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1</priority>
+  </url>
+  <url>
+    <loc>https://ces-2026-seven.vercel.app/vehiculos-autonomos-nivel-5...</loc>
+    <lastmod>2026-01-07T00:00:00.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- ... más artículos -->
+</urlset>
 ```
 
 ## Testing y Calidad de Código
@@ -481,19 +516,23 @@ jobs:
 ces2026/
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml                # GitHub Actions CI workflow
-│       └── README.md             # Documentación del CI
+│       ├── ci.yml                    # GitHub Actions CI workflow
+│       └── README.md                 # Documentación del CI
 ├── public/
-│   └── images/                   # Imágenes estáticas
+│   └── images/                       # Imágenes estáticas
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx           # Layout raíz
-│   │   ├── page.tsx             # Home con ISR
+│   │   ├── layout.tsx               # Layout raíz
+│   │   ├── page.tsx                 # Home con ISR
 │   │   ├── [slug]/
-│   │   │   ├── page.tsx         # Detalle con SSG
-│   │   │   └── not-found.tsx    # 404 personalizado
-│   │   └── robots.ts            # robots.txt
-│   ├── components/              # Componentes con tests
+│   │   │   ├── page.tsx             # Detalle con ISR
+│   │   │   └── not-found.tsx        # 404 personalizado
+│   │   ├── api/
+│   │   │   └── revalidate/
+│   │   │       └── route.ts         # API de revalidación manual
+│   │   ├── robots.ts                # robots.txt dinámico
+│   │   └── sitemap.ts               # sitemap.xml dinámico con ISR
+│   ├── components/                  # Componentes con tests
 │   │   ├── Card/
 │   │   │   ├── Card.tsx
 │   │   │   ├── index.ts
@@ -505,28 +544,29 @@ ces2026/
 │   │   ├── Header/
 │   │   └── index.ts
 │   ├── config/
-│   │   ├── constants.ts         # Constantes (URLs, imágenes)
+│   │   ├── constants.ts             # Constantes (URLs, imágenes)
 │   │   └── index.ts
 │   ├── data/
-│   │   └── articles.json        # Datos locales (fallback)
+│   │   └── articles.json            # Datos locales (fallback)
 │   ├── types/
-│   │   ├── article.ts           # Tipos TypeScript
+│   │   ├── article.ts               # Tipos TypeScript
 │   │   └── index.ts
 │   ├── utils/
-│   │   ├── articles.ts          # Helpers de artículos
-│   │   ├── formatDate.ts        # Formateo de fechas
+│   │   ├── articles/
+│   │   │   └── articles.ts          # API fetching y adaptadores
+│   │   ├── formatDate.ts            # Formateo de fechas
 │   │   └── index.ts
 │   └── tests/
-│       ├── TestAppProviders.tsx # Test wrapper
-│       └── index.tsx            # Test utilities
-├── .env.local                   # Variables de entorno (no committed)
-├── .env.example                 # Template de variables
-├── jest.config.ts               # Configuración de Jest
-├── jest.setup.ts                # Setup de Jest
-├── next.config.ts               # Configuración de Next.js
-├── tailwind.config.ts           # Configuración de Tailwind
-├── tsconfig.json                # Configuración de TypeScript
-└── README.md                    # Este archivo
+│       ├── TestAppProviders.tsx     # Test wrapper
+│       └── index.tsx                # Test utilities
+├── .env.local                       # Variables de entorno (no committed)
+├── .env.example                     # Template de variables
+├── jest.config.ts                   # Configuración de Jest
+├── jest.setup.ts                    # Setup de Jest
+├── next.config.ts                   # Configuración de Next.js
+├── tailwind.config.ts               # Configuración de Tailwind
+├── tsconfig.json                    # Configuración de TypeScript
+└── README.md                        # Este archivo
 ```
 
 ## Requisitos Implementados
@@ -576,7 +616,8 @@ ces2026/
 ### ✅ REQUISITOS DESEABLES (100%)
 
 - ✅ Uso de `generateMetadata` (App Router)
-- ✅ Implementación de robots.txt
+- ✅ Implementación de robots.txt dinámico
+- ✅ **Sitemap.xml dinámico con ISR**
 - ✅ Datos estructurados (JSON-LD Schema.org)
 - ✅ Open Graph metadata
 - ✅ Twitter Cards metadata
@@ -588,6 +629,14 @@ ces2026/
 - ✅ **Cobertura de testing**
 
 ## Mejoras Implementadas (Adicionales)
+
+### Sitemap Dinámico con ISR
+- Generación automática desde la API
+- ISR con 60s de revalidación
+- Incluye todas las páginas de artículos
+- Prioridades y frecuencias de cambio optimizadas
+- Fechas de última modificación precisas
+- Actualización automática cuando hay nuevos artículos
 
 ### Testing Completo
 - 78 tests unitarios con Jest + React Testing Library
@@ -606,12 +655,16 @@ ces2026/
 - Barrel exports para imports limpios
 - Tests co-ubicados con componentes
 - Configuración centralizada
+- Utilidades de API centralizadas
 
-### Integración con Backend
+### Integración con Backend Avanzada
 - Consumo de API REST en producción
+- Múltiples endpoints (listado + detalle por slug)
 - Variables de entorno configurables
 - Transformación de datos de API a tipos locales
+- Adaptadores centralizados para consistencia
 - Manejo de errores robusto
+- API de revalidación manual
 
 ## Métricas de Performance
 
@@ -649,6 +702,7 @@ ces2026/
 ```env
 # API Configuration
 NEXT_PUBLIC_API_URL=https://dev-ces-2026-backend.pantheonsite.io
+NEXT_REVALIDATE_PATH_SECRET=be02b70224a215fc7e13c60d7c3759a4d7f9d688
 ```
 
 Copiar `.env.example` a `.env.local` y configurar según el entorno.
@@ -673,31 +727,14 @@ git push origin main
 
 ## Cumplimiento de Prueba Técnica
 
-Este proyecto cumple completamente con los requisitos de la evaluación técnica:
+Este proyecto cumple con los requisitos de la evaluación técnica:
 
 ✅ **Objetivo**: Frontend Next.js demostrando rendering orientado a SEO
-✅ **Stack**: Next.js + React + TypeScript
-✅ **Páginas**: Listado principal (ISR) + Detalle de artículo (SSG)
-✅ **SEO**: Metadata dinámica, HTML semántico, datos estructurados, robots.txt
-✅ **Performance**: next/image, ISR/SSG, Core Web Vitals optimizados
-✅ **Accesibilidad**: WCAG AA, HTML semántico, labels ARIA
-✅ **Bonus**: generateMetadata, JSON-LD, GitHub Actions CI, 78 tests unitarios
+✅ **Stack**: Next.js 16.1.1 + React 19 + TypeScript 5
+✅ **Páginas**: Listado principal (ISR) + Detalle de artículo (ISR) + Sitemap dinámico
+✅ **SEO**: Metadata dinámica, HTML semántico, datos estructurados, robots.txt, sitemap.xml
+✅ **Performance**: next/image, ISR, Core Web Vitals optimizados, AVIF/WebP
+✅ **Accesibilidad**: WCAG AA, HTML semántico, labels ARIA, navegación por teclado
+✅ **Bonus**: generateMetadata, JSON-LD, sitemap dinámico, GitHub Actions CI, 78 tests unitarios
 
-**Puntuación**: 100% de requisitos obligatorios + 100% de requisitos deseables + mejoras adicionales
-
-## Autor
-
-Proyecto de evaluación técnica para posición Frontend React + Next.js con enfoque en SEO.
-
-Desarrollado demostrando:
-- ✅ Conocimiento avanzado de Next.js App Router
-- ✅ Mejores prácticas de SEO
-- ✅ Competencia en TypeScript
-- ✅ Patrones modernos de React
-- ✅ Testing completo
-- ✅ CI/CD automatizado
-- ✅ Arquitectura escalable
-
-## Licencia
-
-Este es un proyecto de demostración técnica.
+**Puntuación**: 100% de requisitos obligatorios + 100% de requisitos deseables + mejoras adicionales significativas

@@ -546,8 +546,7 @@ ces2026/
 │   ├── config/
 │   │   ├── constants.ts             # Constantes (URLs, imágenes)
 │   │   └── index.ts
-│   ├── data/
-│   │   └── articles.json            # Datos locales (fallback)
+locales (fallback)
 │   ├── types/
 │   │   ├── article.ts               # Tipos TypeScript
 │   │   └── index.ts

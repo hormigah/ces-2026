@@ -1,10 +1,5 @@
 import type { APIArticle, Article } from '@/types';
-import articles from '@/data/articles.json';
 import { API_BASE_URL } from '@/config';
-
-export function getArticleBySlug(slug: string): Article | undefined {
-  return articles.find((article) => article.slug === slug);
-}
 
 // Fetch all articles from API
 export async function getArticlesFromAPI(): Promise<Article[]> {

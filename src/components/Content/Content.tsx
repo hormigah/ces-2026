@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-interface ContentProps {
+export interface ContentProps {
   children: ReactNode;
 }
 

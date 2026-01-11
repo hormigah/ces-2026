@@ -4,7 +4,7 @@ import type { Article } from '@/types';
 import { formatDate } from '@/utils';
 import { DEFAULT_ARTICLE_IMAGE } from '@/config/constants';
 
-interface CardProps {
+export interface CardProps {
   article: Article;
 }
 

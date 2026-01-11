@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import Card from '../Card';
+import { renderComponent } from '@/tests';
+import Card, { type CardProps } from '../Card';
 import type { Article } from '@/types';
 import { DEFAULT_ARTICLE_IMAGE } from '@/config/constants';
 
@@ -18,26 +18,38 @@ describe('Card Component', () => {
     content: '<p>Test content</p>',
   };
 
+  const defaultProps: CardProps = {
+    article: mockArticle,
+  };
+
+  const renderCard = (props: Partial<CardProps> = {}) => {
+    return renderComponent(<Card {...defaultProps} {...props} />);
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render the article with all props correctly', () => {
-    render(<Card article={mockArticle} />);
+    const { getByText } = renderCard();
 
     // Check if title is rendered
-    expect(screen.getByText(mockArticle.title)).toBeInTheDocument();
+    expect(getByText(mockArticle.title)).toBeInTheDocument();
 
     // Check if description is rendered
-    expect(screen.getByText(mockArticle.description)).toBeInTheDocument();
+    expect(getByText(mockArticle.description)).toBeInTheDocument();
 
     // Check if category is rendered
-    expect(screen.getByText(mockArticle.category)).toBeInTheDocument();
+    expect(getByText(mockArticle.category)).toBeInTheDocument();
 
     // Check if author is rendered
-    expect(screen.getByText(mockArticle.author)).toBeInTheDocument();
+    expect(getByText(mockArticle.author)).toBeInTheDocument();
   });
 
   it('should render links with correct href', () => {
-    render(<Card article={mockArticle} />);
+    const { getAllByRole } = renderCard();
 
-    const links = screen.getAllByRole('link');
+    const links = getAllByRole('link');
 
     // Both the image link and title link should point to the article slug
     links.forEach((link) => {
@@ -46,9 +58,9 @@ describe('Card Component', () => {
   });
 
   it('should render the image with correct src and alt', () => {
-    render(<Card article={mockArticle} />);
+    const { getByAltText } = renderCard();
 
-    const image = screen.getByAltText(mockArticle.imageAlt as string);
+    const image = getByAltText(mockArticle.imageAlt as string);
 
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute('src', mockArticle.imageUrl);
@@ -61,10 +73,9 @@ describe('Card Component', () => {
       imageAlt: undefined,
     };
 
-    render(<Card article={articleWithoutImage} />);
+    const { getByAltText } = renderCard({ article: articleWithoutImage });
 
-    const image = screen.getByAltText(mockArticle.title);
-
+    const image = getByAltText(mockArticle.title);
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute('src', DEFAULT_ARTICLE_IMAGE);
   });
@@ -75,18 +86,18 @@ describe('Card Component', () => {
       imageAlt: undefined,
     };
 
-    render(<Card article={articleWithoutImageAlt} />);
+    const { getByAltText } = renderCard({ article: articleWithoutImageAlt });
 
-    const image = screen.getByAltText(mockArticle.title);
+    const image = getByAltText(mockArticle.title);
 
     expect(image).toBeInTheDocument();
   });
 
   it('should render the published date with correct format', () => {
-    render(<Card article={mockArticle} />);
+    const { getByText } = renderCard();
 
     // Use a flexible matcher for the date text (could be formatted differently)
-    const dateElement = screen.getByText(/de enero de 2026/i);
+    const dateElement = getByText(/de enero de 2026/i);
 
     expect(dateElement).toBeInTheDocument();
     expect(dateElement.tagName).toBe('TIME');
@@ -94,48 +105,47 @@ describe('Card Component', () => {
   });
 
   it('should have correct accessibility attributes', () => {
-    render(<Card article={mockArticle} />);
+    const { getByRole, getByText } = renderCard();
 
     // Check for article semantic element
-    const article = screen.getByRole('article');
+    const article = getByRole('article');
     expect(article).toBeInTheDocument();
 
     // Check for time element
-    const timeElement = screen.getByText(/de enero de 2026/i);
+    const timeElement = getByText(/de enero de 2026/i);
     expect(timeElement.tagName).toBe('TIME');
   });
 
   it('should apply hover styles classes', () => {
-    render(<Card article={mockArticle} />);
+    const { getByRole } = renderCard();
 
-    const article = screen.getByRole('article');
+    const article = getByRole('article');
 
     // Check if the article has hover transition classes
     expect(article).toHaveClass('hover:shadow-lg', 'transition-shadow', 'duration-300');
   });
 
   it('should render the category badge with correct styles', () => {
-    render(<Card article={mockArticle} />);
+    const { getByText } = renderCard();
 
-    const categoryBadge = screen.getByText(mockArticle.category);
+    const categoryBadge = getByText(mockArticle.category);
 
     // Check if category badge has the correct styling classes
     expect(categoryBadge).toHaveClass('text-blue-800', 'bg-blue-50', 'rounded-full');
   });
 
   it('should truncate long text with line-clamp classes', () => {
-    render(<Card article={mockArticle} />);
+    const { getByText } = renderCard();
 
-    const title = screen.getByText(mockArticle.title);
-    const description = screen.getByText(mockArticle.description);
-
+    const title = getByText(mockArticle.title);
+    const description = getByText(mockArticle.description);
     // Check if title and description have line-clamp classes
     expect(title.parentElement).toHaveClass('line-clamp-2');
     expect(description).toHaveClass('line-clamp-2');
   });
 
   it('should render SVG icon for author', () => {
-    const { container } = render(<Card article={mockArticle} />);
+    const { container } = renderCard();
 
     // Check if SVG icon is present
     const svg = container.querySelector('svg');

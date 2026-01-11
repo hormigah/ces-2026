@@ -1,47 +1,14 @@
 import Content from '@/components/Content';
 import CardFeatured from '@/components/CardFeatured';
 import Card from '@/components/Card';
-import type { APIArticle, Article } from '@/types';
-import { API_BASE_URL } from '@/config';
+import { getArticlesFromAPI } from '@/utils';
 
 // ISR: Revalidate every 60 seconds
 export const revalidate = 60;
 
-async function getArticles(): Promise<Article[]> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/articles`, {
-      next: { revalidate: 60 },
-    });
-
-    if (!response.ok) {
-      console.error('Failed to fetch articles:', response.status, response.statusText);
-      return [];
-    }
-
-    const data: APIArticle[] = await response.json();
-
-    // Transform API response to match Article type
-    return data.map((article) => ({
-      id: article.id,
-      title: article.title,
-      slug: article.slug,
-      description: article.description,
-      content: article.content,
-      category: article.category,
-      author: article.author,
-      publishedDate: article.publishedDate,
-      imageUrl: article.imageUrl,
-      imageAlt: article.imageAlt,
-      tags: article.tags.split(',').map((tag) => tag.trim()),
-    }));
-  } catch (error) {
-    console.error('Error fetching articles:', error);
-    return [];
-  }
-}
 
 export default async function Home() {
-  const articles = await getArticles();
+  const articles = await getArticlesFromAPI();
   const featuredArticle = articles[0];
   const remainingArticles = articles.slice(1);
 

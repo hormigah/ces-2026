@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Content from '@/components/Content';
-import { formatDate, getArticleBySlug } from '@/utils';
-import articles from '@/data/articles.json';
+import { formatDate, getArticleFromAPI, getArticlesFromAPI } from '@/utils';
 import { DEFAULT_ARTICLE_IMAGE, SITE_LOGO_URL } from '@/config/constants';
+import type { Article } from '@/types';
 
 export interface ArticlePageProps {
   params: Promise<{
@@ -13,10 +13,19 @@ export interface ArticlePageProps {
   }>;
 }
 
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60;
+
+// Find article by slug
+async function getArticleBySlug(slug: string): Promise<Article | undefined> {
+  const articles = await getArticleFromAPI(slug);
+  return articles.find((article) => article.slug === slug || article.slug === `/${slug}`);
+}
+
 // Generación de metadata dinámica para SEO
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getArticleBySlug(slug);
 
   if (!article) {
     return {
@@ -54,16 +63,20 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   };
 }
 
-// Generación estática de parámetros (SSG) - CLAVE para SEO
+// Generación estática de parámetros (ISR) - CLAVE para SEO
 export async function generateStaticParams() {
-  return articles.map((article) => ({
-    slug: article.slug,
-  }));
+  const articles = await getArticlesFromAPI();
+
+  return articles.map((article) => {
+    // Remove leading slash if present in slug
+    const slug = article.slug.startsWith('/') ? article.slug.slice(1) : article.slug;
+    return { slug };
+  });
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getArticleBySlug(slug);
 
   // Manejo de 404 si el artículo no existe
   if (!article) {
@@ -106,7 +119,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://ces2026.com/${slug}`,
+      '@id': `https://ces-2026-seven.vercel.app/${slug}`,
     },
     articleSection: category,
     keywords: tags.join(', '),

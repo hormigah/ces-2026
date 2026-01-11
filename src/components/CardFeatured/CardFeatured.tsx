@@ -27,7 +27,7 @@ export default function CardFeatured({ article }: Readonly<CardFeaturedProps>) {
       <div className="grid md:grid-cols-3 gap-0">
         {/* Imagen destacada - 1/3 del ancho */}
         <Link
-          href={`/${slug}`}
+          href={slug}
           className="h-44 md:h-full md:col-span-1 relative group overflow-hidden bg-gray-800"
           aria-label={`Ver artículo: ${title}`}
         >
@@ -51,7 +51,7 @@ export default function CardFeatured({ article }: Readonly<CardFeaturedProps>) {
 
           {/* Título */}
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 leading-tight">
-            <Link href={`/${slug}`} className="hover:text-blue-800 transition-colors">
+            <Link href={slug} className="hover:text-blue-800 transition-colors">
               {title}
             </Link>
           </h2>

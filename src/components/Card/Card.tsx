@@ -26,7 +26,7 @@ export default function Card({ article }: Readonly<CardProps>) {
       <div className="flex flex-col sm:flex-row gap-0">
         {/* Imagen - Izquierda en desktop */}
         <Link
-          href={`/${slug}`}
+          href={slug}
           className="h-32 sm:h-auto sm:w-48 shrink-0 relative group overflow-hidden bg-gray-200"
           aria-label={`Ver artículo: ${title}`}
         >
@@ -49,7 +49,7 @@ export default function Card({ article }: Readonly<CardProps>) {
 
             {/* Título */}
             <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight">
-              <Link href={`/${slug}`} className="hover:text-blue-800 transition-colors">
+              <Link href={slug} className="hover:text-blue-800 transition-colors">
                 {title}
               </Link>
             </h3>

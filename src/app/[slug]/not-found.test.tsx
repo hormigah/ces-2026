@@ -178,7 +178,9 @@ describe('ArticleNotFound Component', () => {
 
       expect(getByText('404')).toBeInTheDocument();
       expect(getByText('Artículo no encontrado')).toBeInTheDocument();
-      expect(getByText('Lo sentimos, el artículo que buscas no existe o ha sido movido.')).toBeInTheDocument();
+      expect(
+        getByText('Lo sentimos, el artículo que buscas no existe o ha sido movido.')
+      ).toBeInTheDocument();
       expect(getByText('Volver al inicio')).toBeInTheDocument();
       expect(container.querySelector('svg')).toBeInTheDocument();
     });

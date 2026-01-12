@@ -391,9 +391,7 @@ describe('ArticlePage', () => {
     });
 
     it('should handle articles without leading slash', async () => {
-      const mockArticles: Article[] = [
-        { ...mockArticle, slug: 'article-without-slash' },
-      ];
+      const mockArticles: Article[] = [{ ...mockArticle, slug: 'article-without-slash' }];
 
       (utils.getArticlesFromAPI as jest.Mock).mockResolvedValue(mockArticles);
 

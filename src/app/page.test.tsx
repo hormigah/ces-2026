@@ -10,13 +10,13 @@ jest.mock('@/utils', () => ({
 
 // Mock child components to avoid testing their internal logic
 jest.mock('@/components', () => ({
-  Content: ({ children }: { children: React.ReactNode }) => <div data-testid="content">{children}</div>,
+  Content: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="content">{children}</div>
+  ),
   CardFeatured: ({ article }: { article: Article }) => (
     <div data-testid="card-featured">{article.title}</div>
   ),
-  Card: ({ article }: { article: Article }) => (
-    <div data-testid="card">{article.title}</div>
-  ),
+  Card: ({ article }: { article: Article }) => <div data-testid="card">{article.title}</div>,
   ArticlesLoader: () => <div data-testid="articles-loader">Articles Loader</div>,
 }));
 

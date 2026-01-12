@@ -54,10 +54,9 @@ describe('Articles Utilities', () => {
       });
 
       // Verify fetch was called with correct URL
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        `${API_BASE_URL}/api/articles?page=0`,
-        { next: { revalidate: 60 } }
-      );
+      expect(globalThis.fetch).toHaveBeenCalledWith(`${API_BASE_URL}/api/articles?page=0`, {
+        next: { revalidate: 60 },
+      });
     });
 
     it('should fetch articles with specific page number', async () => {
@@ -68,10 +67,9 @@ describe('Articles Utilities', () => {
 
       await getArticlesFromAPI(2);
 
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        `${API_BASE_URL}/api/articles?page=2`,
-        { next: { revalidate: 60 } }
-      );
+      expect(globalThis.fetch).toHaveBeenCalledWith(`${API_BASE_URL}/api/articles?page=2`, {
+        next: { revalidate: 60 },
+      });
     });
 
     it('should return multiple articles', async () => {
@@ -148,10 +146,7 @@ describe('Articles Utilities', () => {
       const result = await getArticlesFromAPI();
 
       expect(result).toEqual([]);
-      expect(console.error).toHaveBeenCalledWith(
-        'Error fetching articles:',
-        expect.any(Error)
-      );
+      expect(console.error).toHaveBeenCalledWith('Error fetching articles:', expect.any(Error));
     });
 
     it('should return empty array when response is not ok', async () => {
@@ -282,10 +277,7 @@ describe('Articles Utilities', () => {
       const result = await getArticleFromAPI('test');
 
       expect(result).toEqual([]);
-      expect(console.error).toHaveBeenCalledWith(
-        'Error fetching articles:',
-        expect.any(Error)
-      );
+      expect(console.error).toHaveBeenCalledWith('Error fetching articles:', expect.any(Error));
     });
 
     it('should return empty array when response is not ok', async () => {
@@ -298,11 +290,7 @@ describe('Articles Utilities', () => {
       const result = await getArticleFromAPI('non-existent');
 
       expect(result).toEqual([]);
-      expect(console.error).toHaveBeenCalledWith(
-        'Failed to fetch articles:',
-        404,
-        'Not Found'
-      );
+      expect(console.error).toHaveBeenCalledWith('Failed to fetch articles:', 404, 'Not Found');
     });
 
     it('should handle empty response', async () => {
@@ -329,10 +317,7 @@ describe('Articles Utilities', () => {
     });
 
     it('should handle multiple articles in response', async () => {
-      const multipleArticles: APIArticle[] = [
-        mockAPIArticle,
-        { ...mockAPIArticle, id: '2' },
-      ];
+      const multipleArticles: APIArticle[] = [mockAPIArticle, { ...mockAPIArticle, id: '2' }];
 
       (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,

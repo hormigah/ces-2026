@@ -165,10 +165,7 @@ describe('useArticlesLoader Hook', () => {
     });
 
     // Verify console.error was called
-    expect(console.error).toHaveBeenCalledWith(
-      'Error loading more articles:',
-      expect.any(Error)
-    );
+    expect(console.error).toHaveBeenCalledWith('Error loading more articles:', expect.any(Error));
   });
 
   it('should handle non-ok response gracefully', async () => {
@@ -252,11 +249,7 @@ describe('useArticlesLoader Hook', () => {
   });
 
   it('should use correct page number in fetch URL', async () => {
-    const batches = [
-      [mockArticles[0]],
-      [mockArticles[1]],
-      [{ ...mockArticles[0], id: '3' }],
-    ];
+    const batches = [[mockArticles[0]], [mockArticles[1]], [{ ...mockArticles[0], id: '3' }]];
 
     (globalThis.fetch as jest.Mock)
       .mockResolvedValueOnce({

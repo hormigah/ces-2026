@@ -79,16 +79,6 @@ npm run format
 npm run test:watch
 ```
 
-### Code Coverage
-
-The workflow includes optional code coverage reporting using Codecov. To enable this feature:
-
-1. Sign up for [Codecov](https://codecov.io/)
-2. Add your repository to Codecov
-3. Add the `CODECOV_TOKEN` as a repository secret in GitHub Settings > Secrets and variables > Actions
-
-If the token is not configured, the workflow will continue without failing.
-
 ## Best Practices
 
 - Ensure all checks pass locally before pushing

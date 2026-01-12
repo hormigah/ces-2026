@@ -1,6 +1,4 @@
-import Content from '@/components/Content';
-import CardFeatured from '@/components/CardFeatured';
-import Card from '@/components/Card';
+import { ArticlesLoader, Card, CardFeatured, Content } from '@/components';
 import { getArticlesFromAPI } from '@/utils';
 
 // ISR: Revalidate every 60 seconds
@@ -38,6 +36,9 @@ export default async function Home() {
             <Card key={article.id} article={article} />
           ))}
         </section>
+
+        {/* Componente para cargar más artículos */}
+        <ArticlesLoader />
 
         {/* Mensaje si no hay artículos */}
         {articles.length === 0 && (

@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import Content from '@/components/Content';
+import { Content } from '@/components';
 import { formatDate, getArticleFromAPI, getArticlesFromAPI } from '@/utils';
 import { DEFAULT_ARTICLE_IMAGE, SITE_LOGO_URL } from '@/config/constants';
 import type { Article } from '@/types';

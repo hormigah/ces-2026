@@ -546,7 +546,6 @@ ces2026/
 │   ├── config/
 │   │   ├── constants.ts             # Constantes (URLs, imágenes)
 │   │   └── index.ts
-locales (fallback)
 │   ├── types/
 │   │   ├── article.ts               # Tipos TypeScript
 │   │   └── index.ts

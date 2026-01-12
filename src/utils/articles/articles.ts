@@ -1,10 +1,13 @@
 import type { APIArticle, Article } from '@/types';
-import { API_BASE_URL } from '@/config';
+import { API_BASE_URL, DEFAULT_ARTICLE_IMAGE } from '@/config';
 
 // Fetch all articles from API
-export async function getArticlesFromAPI(): Promise<Article[]> {
+export async function getArticlesFromAPI(page: number = 0): Promise<Article[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/articles`, {
+    const queryParams = new URLSearchParams({ page: page.toString() });
+    const fullUrl = `${API_BASE_URL}/api/articles?${queryParams}`;
+
+    const response = await fetch(fullUrl, {
       next: { revalidate: 60 },
     });
 
@@ -63,7 +66,7 @@ function adaptArticles(apiArticles: APIArticle[]): Article[] {
     category: article.category,
     author: article.author,
     publishedDate: article.publishedDate,
-    imageUrl: article.imageUrl,
+    imageUrl: article.imageUrl ? article.imageUrl : DEFAULT_ARTICLE_IMAGE,
     imageAlt: article.imageAlt,
     tags: article.tags.split(',').map((tag) => tag.trim()),
   }));

@@ -55,19 +55,51 @@ export async function getArticleFromAPI(slug: string): Promise<Article[]> {
   }
 }
 
+// Decode HTML entities
+export function decodeHTMLEntities(text: string): string {
+  const entities: Record<string, string> = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#039;': "'",
+    '&#39;': "'",
+    '&apos;': "'",
+    '&nbsp;': ' ',
+  };
+
+  return text.replaceAll(/&[#\w]+;/g, (entity) => {
+    // First check our known entities
+    if (entities[entity]) {
+      return entities[entity];
+    }
+
+    // Handle numeric entities like &#039; or &#x27;
+    if (entity.startsWith('&#x')) {
+      const code = Number.parseInt(entity.slice(3, -1), 16);
+      return String.fromCodePoint(code);
+    } else if (entity.startsWith('&#')) {
+      const code = Number.parseInt(entity.slice(2, -1), 10);
+      return String.fromCodePoint(code);
+    }
+
+    return entity;
+  });
+}
+
 function adaptArticles(apiArticles: APIArticle[]): Article[] {
   // Transform API response to match Article type
-  return apiArticles.map((article) => ({
-    id: article.id,
-    title: article.title,
-    slug: article.slug,
-    description: article.description,
-    content: article.content,
-    category: article.category,
-    author: article.author,
-    publishedDate: article.publishedDate,
-    imageUrl: article.imageUrl ? article.imageUrl : DEFAULT_ARTICLE_IMAGE,
-    imageAlt: article.imageAlt,
-    tags: article.tags.split(',').map((tag) => tag.trim()),
+  return apiArticles.map(({ id, title, slug, description, content, category, author, publishedDate, imageUrl, imageAlt, tags }) => ({
+    id: id,
+    title: decodeHTMLEntities(title),
+    slug: slug,
+    description: description,
+    content: content,
+    category: category,
+    author: author,
+    publishedDate: publishedDate,
+    imageUrl: imageUrl ?? DEFAULT_ARTICLE_IMAGE,
+    imageAlt: imageAlt,
+    tags: tags.split(',').map((tag) => tag.trim()),
   }));
 }

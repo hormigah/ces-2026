@@ -1,4 +1,4 @@
-import { getArticlesFromAPI, getArticleFromAPI } from '../articles';
+import { getArticlesFromAPI, getArticleFromAPI, decodeHTMLEntities } from '../articles';
 import type { APIArticle } from '@/types';
 import { API_BASE_URL, DEFAULT_ARTICLE_IMAGE } from '@/config';
 
@@ -349,6 +349,108 @@ describe('Articles Utilities', () => {
       expect(article).toHaveProperty('imageUrl', mockAPIArticle.imageUrl);
       expect(article).toHaveProperty('imageAlt', mockAPIArticle.imageAlt);
       expect(article).toHaveProperty('tags');
+    });
+  });
+
+  describe('decodeHTMLEntities', () => {
+    it('should decode common HTML entities', () => {
+      expect(decodeHTMLEntities('&amp;')).toBe('&');
+      expect(decodeHTMLEntities('&lt;')).toBe('<');
+      expect(decodeHTMLEntities('&gt;')).toBe('>');
+      expect(decodeHTMLEntities('&quot;')).toBe('"');
+      expect(decodeHTMLEntities('&#039;')).toBe("'");
+      expect(decodeHTMLEntities('&#39;')).toBe("'");
+      expect(decodeHTMLEntities('&apos;')).toBe("'");
+      expect(decodeHTMLEntities('&nbsp;')).toBe(' ');
+    });
+
+    it('should decode multiple entities in a single string', () => {
+      expect(decodeHTMLEntities('Tom &amp; Jerry &lt;3')).toBe('Tom & Jerry <3');
+      expect(decodeHTMLEntities('&quot;Hello&quot; &amp; &quot;World&quot;')).toBe('"Hello" & "World"');
+    });
+
+    it('should decode numeric decimal entities', () => {
+      expect(decodeHTMLEntities('&#39;')).toBe("'");
+      expect(decodeHTMLEntities('&#34;')).toBe('"');
+      expect(decodeHTMLEntities('&#60;')).toBe('<');
+      expect(decodeHTMLEntities('&#62;')).toBe('>');
+    });
+
+    it('should decode numeric hexadecimal entities', () => {
+      expect(decodeHTMLEntities('&#x27;')).toBe("'");
+      expect(decodeHTMLEntities('&#x22;')).toBe('"');
+      expect(decodeHTMLEntities('&#x3C;')).toBe('<');
+      expect(decodeHTMLEntities('&#x3E;')).toBe('>');
+    });
+
+    it('should handle text without entities', () => {
+      expect(decodeHTMLEntities('Hello World')).toBe('Hello World');
+      expect(decodeHTMLEntities('123456789')).toBe('123456789');
+    });
+
+    it('should preserve unknown entities', () => {
+      expect(decodeHTMLEntities('&unknown;')).toBe('&unknown;');
+      expect(decodeHTMLEntities('&fakeentity;')).toBe('&fakeentity;');
+    });
+
+    it('should handle empty string', () => {
+      expect(decodeHTMLEntities('')).toBe('');
+    });
+
+    it('should handle complex mixed content', () => {
+      const input = 'React &amp; Next.js: Building &lt;Components&gt; with &#x27;TypeScript&#x27;';
+      const expected = "React & Next.js: Building <Components> with 'TypeScript'";
+      expect(decodeHTMLEntities(input)).toBe(expected);
+    });
+  });
+
+  describe('HTML entity decoding in articles', () => {
+    it('should decode HTML entities in article titles from getArticlesFromAPI', async () => {
+      const articleWithEncodedTitle: APIArticle = {
+        ...mockAPIArticle,
+        title: 'React &amp; TypeScript: A Guide to &#x27;Modern&#x27; Development',
+      };
+
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => [articleWithEncodedTitle],
+      });
+
+      const result = await getArticlesFromAPI();
+
+      expect(result[0].title).toBe("React & TypeScript: A Guide to 'Modern' Development");
+    });
+
+    it('should decode HTML entities in article titles from getArticleFromAPI', async () => {
+      const articleWithEncodedTitle: APIArticle = {
+        ...mockAPIArticle,
+        title: 'Understanding &lt;HTML&gt; Entities &amp; Their Usage',
+      };
+
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => [articleWithEncodedTitle],
+      });
+
+      const result = await getArticleFromAPI('test');
+
+      expect(result[0].title).toBe('Understanding <HTML> Entities & Their Usage');
+    });
+
+    it('should handle titles with quotes and apostrophes', async () => {
+      const articleWithQuotes: APIArticle = {
+        ...mockAPIArticle,
+        title: '&quot;Best Practices&quot; for &#039;Clean Code&#039;',
+      };
+
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => [articleWithQuotes],
+      });
+
+      const result = await getArticlesFromAPI();
+
+      expect(result[0].title).toBe('"Best Practices" for \'Clean Code\'');
     });
   });
 });

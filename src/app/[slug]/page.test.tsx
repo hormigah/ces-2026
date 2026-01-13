@@ -19,16 +19,6 @@ jest.mock('@/utils', () => ({
   formatDate: jest.fn(),
 }));
 
-// Mock Next.js Image component
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: (props: any) => {
-    const { fill, priority, sizes, ...imgProps } = props;
-    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
-    return <img {...imgProps} />;
-  },
-}));
-
 describe('ArticlePage', () => {
   const mockArticle: Article = {
     id: '1',

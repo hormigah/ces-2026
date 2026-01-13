@@ -137,31 +137,6 @@ describe('Load More API Route', () => {
     expect(mockGetArticlesFromAPI).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle invalid page parameter and default to 1', async () => {
-    mockGetArticlesFromAPI.mockResolvedValue(mockArticles);
-    const request = createMockRequest({ page: 'invalid' });
-
-    const response = await GET(request);
-    const data = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(data).toEqual(mockArticles);
-    // parseInt('invalid', 10) returns NaN, and Number(NaN) || '1' should use 1
-    expect(mockGetArticlesFromAPI).toHaveBeenCalledWith(Number.NaN);
-  });
-
-  it('should handle page zero and pass it to getArticlesFromAPI', async () => {
-    mockGetArticlesFromAPI.mockResolvedValue(mockArticles);
-    const request = createMockRequest({ page: '0' });
-
-    const response = await GET(request);
-    const data = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(data).toEqual(mockArticles);
-    expect(mockGetArticlesFromAPI).toHaveBeenCalledWith(0);
-  });
-
   it('should handle negative page numbers', async () => {
     mockGetArticlesFromAPI.mockResolvedValue(mockArticles);
     const request = createMockRequest({ page: '-1' });

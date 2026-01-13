@@ -94,7 +94,8 @@ describe('Revalidate API Route', () => {
       now: expect.any(Number),
     });
     expect(mockRevalidatePath).toHaveBeenCalledWith('/');
-    expect(mockRevalidatePath).toHaveBeenCalledTimes(1);
+    expect(mockRevalidatePath).toHaveBeenCalledWith('/sitemap.xml');
+    expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
   });
 
   it('should return 500 when revalidatePath throws an error', async () => {

@@ -123,10 +123,7 @@ describe('Load More API Route', () => {
     expect(response.status).toBe(500);
     expect(data).toEqual({ error: 'Failed to load articles' });
     expect(mockGetArticlesFromAPI).toHaveBeenCalledWith(1);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Error in load-more API:',
-      expect.any(Error)
-    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error in load-more API:', expect.any(Error));
   });
 
   it('should handle page parameter as string and convert to number', async () => {

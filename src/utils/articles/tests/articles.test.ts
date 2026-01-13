@@ -366,7 +366,9 @@ describe('Articles Utilities', () => {
 
     it('should decode multiple entities in a single string', () => {
       expect(decodeHTMLEntities('Tom &amp; Jerry &lt;3')).toBe('Tom & Jerry <3');
-      expect(decodeHTMLEntities('&quot;Hello&quot; &amp; &quot;World&quot;')).toBe('"Hello" & "World"');
+      expect(decodeHTMLEntities('&quot;Hello&quot; &amp; &quot;World&quot;')).toBe(
+        '"Hello" & "World"'
+      );
     });
 
     it('should decode numeric decimal entities', () => {

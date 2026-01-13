@@ -89,17 +89,10 @@ export function decodeHTMLEntities(text: string): string {
 
 function adaptArticles(apiArticles: APIArticle[]): Article[] {
   // Transform API response to match Article type
-  return apiArticles.map(({ id, title, slug, description, content, category, author, publishedDate, imageUrl, imageAlt, tags }) => ({
-    id: id,
+  return apiArticles.map(({ title, imageUrl, tags, ...rest }) => ({
+    ...rest,
     title: decodeHTMLEntities(title),
-    slug: slug,
-    description: description,
-    content: content,
-    category: category,
-    author: author,
-    publishedDate: publishedDate,
     imageUrl: imageUrl ?? DEFAULT_ARTICLE_IMAGE,
-    imageAlt: imageAlt,
     tags: tags.split(',').map((tag) => tag.trim()),
   }));
 }

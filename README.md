@@ -41,6 +41,7 @@ cp .env.example .env.local
 Editar `.env.local` con la URL del backend:
 ```env
 NEXT_PUBLIC_API_URL=https://dev-ces-2026-backend.pantheonsite.io
+NEXT_REVALIDATE_PATH_SECRET=be02b70224a215fc7e13c60d7c3759a4d7f9d688
 ```
 
 4. Ejecutar el servidor de desarrollo:
@@ -101,6 +102,18 @@ El proyecto consume datos de una API REST con funciones centralizadas:
 - **Ubicación**: Utilidades centralizadas en `src/utils/articles/articles.ts`
 
 
+### Backend
+Los artículos se exponen desde un CMS en Drupal el cual permite tener el CRUD para los artículos con los siguientes datos de conexión:
+```
+URL Login: https://dev-ces-2026-backend.pantheonsite.io/user/login
+username: editor
+password: 123456
+
+Lista de artículos: https://dev-ces-2026-backend.pantheonsite.io/admin/content
+Crear artículo: https://dev-ces-2026-backend.pantheonsite.io/node/add/article
+
+```
+
 ### Arquitectura de Componentes
 
 Estructura modular con separación de responsabilidades:
@@ -109,23 +122,10 @@ Estructura modular con separación de responsabilidades:
 src/
 ├── app/                      # App Router
 ├── components/               # Componentes UI
-│   ├── Card/
-│   │   ├── Card.tsx
-│   │   ├── index.ts
-│   │   └── tests/
-│   │       └── Card.test.tsx
-│   ├── CardFeatured/
-│   ├── Content/
-│   ├── Footer/
-│   └── Header/
 ├── config/                   # Configuración centralizada
-│   ├── constants.ts
-│   └── index.ts
 ├── types/                    # Definiciones TypeScript
 ├── utils/                    # Utilidades compartidas
 └── tests/                    # Testing utilities
-    ├── TestAppProviders.tsx
-    └── index.tsx
 ```
 
 **Características:**
@@ -139,30 +139,32 @@ src/
 ### Incremental Static Regeneration (ISR) + SSG
 
 **Página Principal (`/`):**
-- **ISR con revalidate: 60 segundos**
+- **ISR con revalidate: 5 minutos**
 - Fetch desde API externa
 - Balance entre performance (static) y frescura de datos (revalidación)
-- HTML estático actualizado automáticamente cada 60s
+- HTML estático actualizado automáticamente cada 5 minutos
+- Endpoint en el frontend para revalidar a demanda desde el backend (https://ces-2026-seven.vercel.app/api/revalidate?path=/&token=be02b70224a215fc7e13c60d7c3759a4d7f9d688)
 
 **Justificación de ISR:**
-- Contenido se actualiza periódicamente desde el backend
+- Contenido se actualiza periódicamente (cada 5 minutos)
 - Los bots ven HTML estático completo (excelente SEO)
 - Los usuarios obtienen contenido reciente sin esperar
 - Reducción de carga en el servidor API
 
 **Página de Detalle (`/[slug]`):**
-- **ISR con `generateStaticParams` + revalidate: 60 segundos**
-- Pre-genera todas las rutas en build time
-- Se actualiza automáticamente cada 60 segundos
+- **ISR con `generateStaticParams` + revalidate: 5 minutos**
+- Pre-genera los primeros 5 artículos en build time
+- Se actualiza automáticamente cada 5 minutos
 - Metadata dinámica con `generateMetadata`
 - Fallback a 404 si el slug no existe
+- Endpoint en el frontend para revalidar a demanda desde el backend (https://ces-2026-seven.vercel.app/api/revalidate?path=[slug]&token=be02b70224a215fc7e13c60d7c3759a4d7f9d688)
 
 **Sitemap Dinámico (`/sitemap.xml`):**
-- **ISR con revalidate: 60 segundos**
+- **ISR con revalidate: 5 minutos**
 - Genera automáticamente URLs de todos los artículos
 - Incluye prioridades y frecuencias de cambio
 - Fechas de última modificación basadas en publishedDate
-- Se actualiza automáticamente cuando hay nuevos artículos
+- Se actualiza automáticamente cuando se genera un nuevo artículo en el backend
 
 ### Proceso de Build
 
@@ -360,7 +362,7 @@ Implementado en `app/sitemap.ts` con generación dinámica desde la API:
 
 **Beneficios para SEO:**
 - **Descubrimiento automático**: Los motores de búsqueda encuentran todas las páginas
-- **Actualización dinámica**: Se regenera cada 60s con ISR, incluyendo nuevos artículos
+- **Actualización dinámica**: Se regenera cada 5 minutos con ISR, incluyendo nuevos artículos
 - **Prioridades correctas**: Homepage = 1.0, artículos = 0.8
 - **Fechas precisas**: `lastModified` basado en fecha de publicación real
 - **Frecuencia de cambio**: Indica a buscadores cuándo revisar (`daily` vs `weekly`)
@@ -393,16 +395,9 @@ Implementado en `app/sitemap.ts` con generación dinámica desde la API:
 **78 tests unitarios** cubriendo todos los componentes principales:
 
 ```bash
-Test Suites: 5 passed, 5 total
-Tests:       78 passed, 78 total
+Test Suites: 16 passed, 516 total
+Tests:       352 passed, 352 total
 ```
-
-**Componentes testeados:**
-- ✅ Card (17 tests)
-- ✅ CardFeatured (17 tests)
-- ✅ Content (12 tests)
-- ✅ Footer (18 tests)
-- ✅ Header (20 tests)
 
 ### Patrón de Testing
 
@@ -476,96 +471,12 @@ Workflow automatizado (`.github/workflows/ci.yml`) que ejecuta en cada push y PR
 4. ✅ **Unit Tests**: `npm run test`
 5. ✅ **Coverage Report**: `npm run test:coverage`
 
-```yaml
-name: CI
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-
-jobs:
-  quality-checks:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20.x]
-    steps:
-      - Checkout code
-      - Setup Node.js
-      - Install dependencies
-      - Run type check
-      - Run linter
-      - Check code formatting
-      - Run unit tests
-      - Generate coverage report
-```
-
 ### Beneficios
 
 - **Calidad garantizada**: No se puede mergear código que falle las verificaciones
 - **Feedback rápido**: Los desarrolladores saben inmediatamente si algo se rompió
 - **Documentación**: El workflow documenta el proceso de QA
 - **Automatización**: Sin intervención manual necesaria
-
-## Estructura del Proyecto
-
-### Árbol de Archivos
-
-```
-ces2026/
-├── .github/
-│   └── workflows/
-│       ├── ci.yml                    # GitHub Actions CI workflow
-│       └── README.md                 # Documentación del CI
-├── public/
-│   └── images/                       # Imágenes estáticas
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx               # Layout raíz
-│   │   ├── page.tsx                 # Home con ISR
-│   │   ├── [slug]/
-│   │   │   ├── page.tsx             # Detalle con ISR
-│   │   │   └── not-found.tsx        # 404 personalizado
-│   │   ├── api/
-│   │   │   └── revalidate/
-│   │   │       └── route.ts         # API de revalidación manual
-│   │   ├── robots.ts                # robots.txt dinámico
-│   │   └── sitemap.ts               # sitemap.xml dinámico con ISR
-│   ├── components/                  # Componentes con tests
-│   │   ├── Card/
-│   │   │   ├── Card.tsx
-│   │   │   ├── index.ts
-│   │   │   └── tests/
-│   │   │       └── Card.test.tsx
-│   │   ├── CardFeatured/
-│   │   ├── Content/
-│   │   ├── Footer/
-│   │   ├── Header/
-│   │   └── index.ts
-│   ├── config/
-│   │   ├── constants.ts             # Constantes (URLs, imágenes)
-│   │   └── index.ts
-│   ├── types/
-│   │   ├── article.ts               # Tipos TypeScript
-│   │   └── index.ts
-│   ├── utils/
-│   │   ├── articles/
-│   │   │   └── articles.ts          # API fetching y adaptadores
-│   │   ├── formatDate.ts            # Formateo de fechas
-│   │   └── index.ts
-│   └── tests/
-│       ├── TestAppProviders.tsx     # Test wrapper
-│       └── index.tsx                # Test utilities
-├── .env.local                       # Variables de entorno (no committed)
-├── .env.example                     # Template de variables
-├── jest.config.ts                   # Configuración de Jest
-├── jest.setup.ts                    # Setup de Jest
-├── next.config.ts                   # Configuración de Next.js
-├── tailwind.config.ts               # Configuración de Tailwind
-├── tsconfig.json                    # Configuración de TypeScript
-└── README.md                        # Este archivo
-```
 
 ## Requisitos Implementados
 
@@ -580,7 +491,7 @@ ces2026/
 - ✅ Listado de artículos (5+ artículos con contenido completo)
 - ✅ Título SEO (`<title>`) y meta description
 - ✅ URLs amigables (`/ia-generativa-revoluciona-entretenimiento-ces-2026`)
-- ✅ **ISR con revalidate: 60 segundos**
+- ✅ **ISR con revalidate**
 - ✅ Contenido completamente indexable
 
 **3. Página de Detalle de Artículo:**
@@ -588,8 +499,8 @@ ces2026/
 - ✅ Contenido completo del artículo
 - ✅ Metadata dinámica (título y descripción basados en contenido)
 - ✅ URL semántica basada en slug
-- ✅ SSG con `generateStaticParams`
-- ✅ Renderizado de contenido en servidor
+- ✅ **ISR con revalidate**
+- ✅ Renderizado de contenido en el servidor
 
 **4. SEO Técnico:**
 - ✅ Metadata dinámica por página con `generateMetadata`
@@ -623,21 +534,20 @@ ces2026/
 - ✅ Integración con API externa
 - ✅ Variables de entorno
 - ✅ **GitHub Actions CI/CD**
-- ✅ **78 tests unitarios**
 - ✅ **Cobertura de testing**
 
 ## Mejoras Implementadas (Adicionales)
 
 ### Sitemap Dinámico con ISR
 - Generación automática desde la API
-- ISR con 60s de revalidación
+- ISR con 5 minutos de revalidación
 - Incluye todas las páginas de artículos
 - Prioridades y frecuencias de cambio optimizadas
 - Fechas de última modificación precisas
 - Actualización automática cuando hay nuevos artículos
 
 ### Testing Completo
-- 78 tests unitarios con Jest + React Testing Library
+- 352 tests unitarios con Jest + React Testing Library
 - Testing utilities personalizadas
 - Cobertura de todos los componentes principales
 - Patrón AAA consistente
@@ -722,17 +632,3 @@ git push origin main
 - Install Command: `npm install`
 - Node Version: 20.x
 - Environment Variables: Configurar `NEXT_PUBLIC_API_URL`
-
-## Cumplimiento de Prueba Técnica
-
-Este proyecto cumple con los requisitos de la evaluación técnica:
-
-✅ **Objetivo**: Frontend Next.js demostrando rendering orientado a SEO
-✅ **Stack**: Next.js 16.1.1 + React 19 + TypeScript 5
-✅ **Páginas**: Listado principal (ISR) + Detalle de artículo (ISR) + Sitemap dinámico
-✅ **SEO**: Metadata dinámica, HTML semántico, datos estructurados, robots.txt, sitemap.xml
-✅ **Performance**: next/image, ISR, Core Web Vitals optimizados, AVIF/WebP
-✅ **Accesibilidad**: WCAG AA, HTML semántico, labels ARIA, navegación por teclado
-✅ **Bonus**: generateMetadata, JSON-LD, sitemap dinámico, GitHub Actions CI, 78 tests unitarios
-
-**Puntuación**: 100% de requisitos obligatorios + 100% de requisitos deseables + mejoras adicionales significativas

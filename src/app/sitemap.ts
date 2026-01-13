@@ -2,6 +2,9 @@ import { MetadataRoute } from 'next';
 import { getArticlesFromAPI } from '@/utils';
 import { SITE_URL } from '@/config/constants';
 
+// ISR: Revalidate every 5 minutes
+export const revalidate = 300;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch all articles from API iterating through all pages
   const allArticles = [];

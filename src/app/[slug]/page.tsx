@@ -13,8 +13,8 @@ export interface ArticlePageProps {
   }>;
 }
 
-// ISR: Revalidate every 60 seconds
-export const revalidate = 60;
+// ISR: Revalidate every 5 minutes
+export const revalidate = 300;
 
 // Find article by slug
 async function getArticleBySlug(slug: string): Promise<Article | undefined> {

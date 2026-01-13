@@ -10,8 +10,11 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const path = request.nextUrl.searchParams.get('path');
-    revalidatePath(path || '/');
+    const path = request.nextUrl.searchParams.get('path') || '/';
+    revalidatePath(path);
+    if (path === '/') {
+      revalidatePath('/sitemap.xml');
+    }
 
     return NextResponse.json({ revalidated: true, now: Date.now() });
   } catch {

@@ -1,8 +1,8 @@
 import { ArticlesLoader, Card, CardFeatured, Content } from '@/components';
 import { getArticlesFromAPI } from '@/utils';
 
-// ISR: Revalidate every 60 seconds
-export const revalidate = 60;
+// ISR: Revalidate every 5 minutes
+export const revalidate = 300;
 
 export default async function Home() {
   const articles = await getArticlesFromAPI();
